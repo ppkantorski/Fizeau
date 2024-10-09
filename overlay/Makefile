@@ -6,62 +6,66 @@ TOPDIR           ?=    $(CURDIR)
 
 # -----------------------------------------------
 
-APP_TITLE         =    Fizeau
-APP_AUTHOR        =    averne
-APP_ICON          =
-APP_VERSION       =    $(FZ_VERSION)
-APP_TITLEID       =
+APP_TITLE         :=    Fizeau
+APP_AUTHOR        :=    averne
+APP_ICON          :=
+APP_VERSION       :=    2.5.5+
+APP_TITLEID       :=
 
-TARGET            =    Fizeau
-EXTENSION         =    ovl
-OUT               =    out
-BUILD             =    build
-SOURCES           =    src
-INCLUDES          =    include ../lib/libtesla/include
-CUSTOM_LIBS       =    ../common ../lib/inih
-ROMFS             =
+TARGET            :=    Fizeau
+EXTENSION         :=    ovl
+OUT               :=    out
+BUILD             :=    build
+SOURCES           :=    lib/libultrahand/libultra/source src
+INCLUDES          :=    lib/libultrahand/libultra/include lib/libultrahand/libtesla/include include
+CUSTOM_LIBS       :=    ../common ../lib/inih
+ROMFS             :=
 
-DEFINES           =    __SWITCH__ VERSION=\"$(FZ_VERSION)\" COMMIT=\"$(FZ_COMMIT)\"
-ARCH              =    -march=armv8-a+crc+crypto+simd -mtune=cortex-a57 -mtp=soft -fpie
-FLAGS             =    -Wall -pipe -g -O2 -ffunction-sections -fdata-sections
-CFLAGS            =    -std=gnu11
-CXXFLAGS          =    -std=gnu++20 -fno-exceptions
-ASFLAGS           =
-LDFLAGS           =    -Wl,-pie -specs=$(DEVKITPRO)/libnx/switch.specs -g
-LINKS             =    -lcommon -linih -lnx
+DEFINES           :=    __SWITCH__ VERSION=\"$(APP_VERSION)\" COMMIT=\"$(FZ_COMMIT)\"
+ARCH              :=    -march=armv8-a+crc+crypto+simd -mtune=cortex-a57 -mtp=soft -fpie
+FLAGS             :=    -Wall -pipe -g -O2 -ffunction-sections -fdata-sections
+CFLAGS            :=    -std=gnu11
 
-PREFIX            =    aarch64-none-elf-
-CC                =    $(PREFIX)gcc
-CXX               =    $(PREFIX)g++
-AS                =    $(PREFIX)as
-LD                =    $(PREFIX)g++
-NM                =    $(PREFIX)gcc-nm
+# Enable appearance overriding
+UI_OVERRIDE_PATH := /config/fizeau/
+CFLAGS += -DUI_OVERRIDE_PATH="\"$(UI_OVERRIDE_PATH)\""
+
+CXXFLAGS          :=    -DUI_OVERRIDE_PATH="\"$(UI_OVERRIDE_PATH)\"" -std=gnu++20 -fno-exceptions
+ASFLAGS           :=
+LDFLAGS           :=    -Wl,-pie -specs=$(DEVKITPRO)/libnx/switch.specs -g
+LINKS             :=    -lcommon -linih -lcurl -lz -lzzip -lmbedtls -lmbedx509 -lmbedcrypto -ljansson -lnx 
+
+PREFIX            :=    aarch64-none-elf-
+CC                :=    $(PREFIX)gcc
+CXX               :=    $(PREFIX)g++
+AS                :=    $(PREFIX)as
+LD                :=    $(PREFIX)g++
+NM                :=    $(PREFIX)gcc-nm
 
 # -----------------------------------------------
 
 export PATH      :=    $(DEVKITPRO)/tools/bin:$(DEVKITPRO)/devkitA64/bin:$(PORTLIBS)/bin:$(PATH)
 
-PORTLIBS          =    $(DEVKITPRO)/portlibs/switch
-LIBNX             =    $(DEVKITPRO)/libnx
-LIBS              =    $(CUSTOM_LIBS) $(LIBNX) $(PORTLIBS)
-
+PORTLIBS          :=    $(DEVKITPRO)/portlibs/switch
+LIBNX             :=    $(DEVKITPRO)/libnx
+LIBS              :=    $(CUSTOM_LIBS) $(LIBNX) $(PORTLIBS)
 # -----------------------------------------------
 
-CFILES            =    $(shell find $(SOURCES) -name *.c)
-CPPFILES          =    $(shell find $(SOURCES) -name *.cpp)
-SFILES            =    $(shell find $(SOURCES) -name *.s -or -name *.S)
-OFILES            =    $(CFILES:%=$(BUILD)/%.o) $(CPPFILES:%=$(BUILD)/%.o) $(SFILES:%=$(BUILD)/%.o)
-DFILES            =    $(OFILES:.o=.d)
+CFILES            :=    $(shell find $(SOURCES) -name *.c)
+CPPFILES          :=    $(shell find $(SOURCES) -name *.cpp)
+SFILES            :=    $(shell find $(SOURCES) -name *.s -or -name *.S)
+OFILES            :=    $(CFILES:%=$(BUILD)/%.o) $(CPPFILES:%=$(BUILD)/%.o) $(SFILES:%=$(BUILD)/%.o)
+DFILES            :=    $(OFILES:.o=.d)
 
-LIBS_TARGET       =    $(shell find $(addsuffix /lib,$(CUSTOM_LIBS)) -name "*.a" 2>/dev/null)
-NX_TARGET         =    $(if $(OUT:=), $(OUT)/$(TARGET).$(EXTENSION), .$(OUT)/$(TARGET).$(EXTENSION))
-ELF_TARGET        =    $(if $(OUT:=), $(OUT)/$(TARGET).elf, .$(OUT)/$(TARGET).elf)
-NACP_TARGET       =    $(if $(OUT:=), $(OUT)/$(TARGET).nacp, .$(OUT)/$(TARGET).nacp)
+LIBS_TARGET       :=    $(shell find $(addsuffix /lib,$(CUSTOM_LIBS)) -name "*.a" 2>/dev/null)
+NX_TARGET         :=    $(if $(OUT:=), $(OUT)/$(TARGET).$(EXTENSION), .$(OUT)/$(TARGET).$(EXTENSION))
+ELF_TARGET        :=    $(if $(OUT:=), $(OUT)/$(TARGET).elf, .$(OUT)/$(TARGET).elf)
+NACP_TARGET       :=    $(if $(OUT:=), $(OUT)/$(TARGET).nacp, .$(OUT)/$(TARGET).nacp)
 
-DEFINE_FLAGS      =    $(addprefix -D,$(DEFINES))
-INCLUDE_FLAGS     =    $(addprefix -I$(CURDIR)/,$(INCLUDES)) $(foreach dir,$(CUSTOM_LIBS),-I$(CURDIR)/$(dir)/include) \
+DEFINE_FLAGS      :=    $(addprefix -D,$(DEFINES))
+INCLUDE_FLAGS     :=    $(addprefix -I$(CURDIR)/,$(INCLUDES)) $(foreach dir,$(CUSTOM_LIBS),-I$(CURDIR)/$(dir)/include) \
                        $(foreach dir,$(filter-out $(CUSTOM_LIBS),$(LIBS)),-I$(dir)/include)
-LIB_FLAGS         =    $(foreach dir,$(LIBS),-L$(dir)/lib)
+LIB_FLAGS         :=    $(foreach dir,$(LIBS),-L$(dir)/lib)
 
 # -----------------------------------------------
 
