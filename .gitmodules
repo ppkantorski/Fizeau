@@ -7,3 +7,6 @@
 [submodule "lib/nvjpg/oss-nvjpg"]
 	path = lib/nvjpg/oss-nvjpg
 	url = https://github.com/averne/oss-nvjpg.git
+[submodule "overlay/lib/libultrahand"]
+	path = overlay/lib/libultrahand
+	url = https://github.com/ppkantorski/libultrahand
