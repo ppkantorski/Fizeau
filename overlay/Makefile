@@ -27,7 +27,7 @@ FLAGS             :=    -Wall -pipe -g -O2 -ffunction-sections -fdata-sections
 CFLAGS            :=    -std=gnu11
 
 # Enable appearance overriding
-UI_OVERRIDE_PATH := /config/fizeau/
+UI_OVERRIDE_PATH := /config/Fizeau/
 CFLAGS += -DUI_OVERRIDE_PATH="\"$(UI_OVERRIDE_PATH)\""
 
 CXXFLAGS          :=    -DUI_OVERRIDE_PATH="\"$(UI_OVERRIDE_PATH)\"" -std=gnu++20 -fno-exceptions
