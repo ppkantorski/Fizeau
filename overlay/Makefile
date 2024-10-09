@@ -1,217 +1,158 @@
-#---------------------------------------------------------------------------------
-.SUFFIXES:
-#---------------------------------------------------------------------------------
-
 ifeq ($(strip $(DEVKITPRO)),)
-$(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>/devkitpro")
+    $(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>/devkitpro")
 endif
 
-TOPDIR ?= $(CURDIR)
-include $(DEVKITPRO)/libnx/switch_rules
+TOPDIR           ?=    $(CURDIR)
 
-#---------------------------------------------------------------------------------
-# TARGET is the name of the output
-# BUILD is the directory where object files & intermediate files will be placed
-# SOURCES is a list of directories containing source code
-# DATA is a list of directories containing data files
-# INCLUDES is a list of directories containing header files
-# ROMFS is the directory containing data to be added to RomFS, relative to the Makefile (Optional)
-#
-# NO_ICON: if set to anything, do not use icon.
-# NO_NACP: if set to anything, no .nacp file is generated.
-# APP_TITLE is the name of the app stored in the .nacp file (Optional)
-# APP_AUTHOR is the author of the app stored in the .nacp file (Optional)
-# APP_VERSION is the version of the app stored in the .nacp file (Optional)
-# APP_TITLEID is the titleID of the app stored in the .nacp file (Optional)
-# ICON is the filename of the icon (.jpg), relative to the project folder.
-#   If not set, it attempts to use one of the following (in this order):
-#     - <Project name>.jpg
-#     - icon.jpg
-#     - <libnx folder>/default_icon.jpg
-#
-# CONFIG_JSON is the filename of the NPDM config file (.json), relative to the project folder.
-#   If not set, it attempts to use one of the following (in this order):
-#     - <Project name>.json
-#     - config.json
-#   If a JSON file is provided or autodetected, an ExeFS PFS0 (.nsp) is built instead
-#   of a homebrew executable (.nro). This is intended to be used for sysmodules.
-#   NACP building is skipped as well.
-#---------------------------------------------------------------------------------
-APP_TITLE	:=	NX-FanControl
-APP_VERSION :=	1.0.1+
+# -----------------------------------------------
 
-TARGET		:=	$(APP_TITLE)
-BUILD		:=	build
-SOURCES		:=	source lib/libultrahand/libultra/source
-DATA		:=	data
-INCLUDES	:=	include lib/libultrahand/libultra/include lib/libultrahand/libtesla/include ../lib/libfancontrol/include
+APP_TITLE         :=    Fizeau
+APP_AUTHOR        :=    averne
+APP_ICON          :=
+APP_VERSION       :=    2.5.5+
+APP_TITLEID       :=
 
-NO_ICON		:=  1
+TARGET            :=    Fizeau
+EXTENSION         :=    ovl
+OUT               :=    out
+BUILD             :=    build
+SOURCES           :=    lib/libultrahand/libultra/source src
+INCLUDES          :=    lib/libultrahand/libultra/include lib/libultrahand/libtesla/include include
+CUSTOM_LIBS       :=    ../common ../lib/inih
+ROMFS             :=
 
-#---------------------------------------------------------------------------------
-# options for code generation
-#---------------------------------------------------------------------------------
-ARCH	:=	-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
-
-CFLAGS	:=	-g -Wall -O2 -ffunction-sections \
-			$(ARCH) $(DEFINES)
-
-CFLAGS	+=	$(INCLUDE) -D__SWITCH__
+DEFINES           :=    __SWITCH__ VERSION=\"$(APP_VERSION)\" COMMIT=\"$(FZ_COMMIT)\"
+ARCH              :=    -march=armv8-a+crc+crypto+simd -mtune=cortex-a57 -mtp=soft -fpie
+FLAGS             :=    -Wall -pipe -g -O2 -ffunction-sections -fdata-sections
+CFLAGS            :=    -std=gnu11
+CXXFLAGS          :=    -std=gnu++20 -fno-exceptions
 
 # Enable appearance overriding
-UI_OVERRIDE_PATH := /config/sys-modules/
+UI_OVERRIDE_PATH := /config/Fizeau/
 CFLAGS += -DUI_OVERRIDE_PATH="\"$(UI_OVERRIDE_PATH)\""
+CXXFLAGS += -DUI_OVERRIDE_PATH="\"$(UI_OVERRIDE_PATH)\""
 
-# For theme / wallpaper loading in GUI class method (add to project if theme does not appear)
+# For theme / wallpaper loading conducted in GUI class method (add to project if theme does not appear)
 INITIALIZE_IN_GUI_DIRECTIVE := 1
 CFLAGS += -DINITIALIZE_IN_GUI_DIRECTIVE=$(INITIALIZE_IN_GUI_DIRECTIVE)
+CXXFLAGS += -DINITIALIZE_IN_GUI_DIRECTIVE=$(INITIALIZE_IN_GUI_DIRECTIVE)
 
 
-CXXFLAGS	:= $(CFLAGS) -fno-exceptions -std=c++20
+ASFLAGS           :=
+LDFLAGS           :=    -Wl,-pie -specs=$(DEVKITPRO)/libnx/switch.specs -g
+LINKS             :=    -lcommon -linih -lcurl -lz -lzzip -lmbedtls -lmbedx509 -lmbedcrypto -ljansson -lnx 
 
-ASFLAGS	:=	-g $(ARCH)
-LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
+PREFIX            :=    aarch64-none-elf-
+CC                :=    $(PREFIX)gcc
+CXX               :=    $(PREFIX)g++
+AS                :=    $(PREFIX)as
+LD                :=    $(PREFIX)g++
+NM                :=    $(PREFIX)gcc-nm
 
-LIBS	:= -lcurl -lz -lzzip -lmbedtls -lmbedx509 -lmbedcrypto -ljansson -lnx ../../lib/libfancontrol/lib/libfancontrol.a
+# -----------------------------------------------
 
-#---------------------------------------------------------------------------------
-# list of directories containing libraries, this must be the top level containing
-# include and lib
-#---------------------------------------------------------------------------------
-LIBDIRS	:= $(PORTLIBS) $(LIBNX)
+export PATH      :=    $(DEVKITPRO)/tools/bin:$(DEVKITPRO)/devkitA64/bin:$(PORTLIBS)/bin:$(PATH)
 
+PORTLIBS          :=    $(DEVKITPRO)/portlibs/switch
+LIBNX             :=    $(DEVKITPRO)/libnx
+LIBS              :=    $(CUSTOM_LIBS) $(LIBNX) $(PORTLIBS)
+# -----------------------------------------------
 
-#---------------------------------------------------------------------------------
-# no real need to edit anything past this point unless you need to add additional
-# rules for different file extensions
-#---------------------------------------------------------------------------------
-ifneq ($(BUILD),$(notdir $(CURDIR)))
-#---------------------------------------------------------------------------------
+CFILES            :=    $(shell find $(SOURCES) -name *.c)
+CPPFILES          :=    $(shell find $(SOURCES) -name *.cpp)
+SFILES            :=    $(shell find $(SOURCES) -name *.s -or -name *.S)
+OFILES            :=    $(CFILES:%=$(BUILD)/%.o) $(CPPFILES:%=$(BUILD)/%.o) $(SFILES:%=$(BUILD)/%.o)
+DFILES            :=    $(OFILES:.o=.d)
 
-export OUTPUT	:=	$(CURDIR)/$(TARGET)
-export TOPDIR	:=	$(CURDIR)
+LIBS_TARGET       :=    $(shell find $(addsuffix /lib,$(CUSTOM_LIBS)) -name "*.a" 2>/dev/null)
+NX_TARGET         :=    $(if $(OUT:=), $(OUT)/$(TARGET).$(EXTENSION), .$(OUT)/$(TARGET).$(EXTENSION))
+ELF_TARGET        :=    $(if $(OUT:=), $(OUT)/$(TARGET).elf, .$(OUT)/$(TARGET).elf)
+NACP_TARGET       :=    $(if $(OUT:=), $(OUT)/$(TARGET).nacp, .$(OUT)/$(TARGET).nacp)
 
-export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
-			$(foreach dir,$(DATA),$(CURDIR)/$(dir))
+DEFINE_FLAGS      :=    $(addprefix -D,$(DEFINES))
+INCLUDE_FLAGS     :=    $(addprefix -I$(CURDIR)/,$(INCLUDES)) $(foreach dir,$(CUSTOM_LIBS),-I$(CURDIR)/$(dir)/include) \
+                       $(foreach dir,$(filter-out $(CUSTOM_LIBS),$(LIBS)),-I$(dir)/include)
+LIB_FLAGS         :=    $(foreach dir,$(LIBS),-L$(dir)/lib)
 
-export DEPSDIR	:=	$(CURDIR)/$(BUILD)
+# -----------------------------------------------
 
-CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
-CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
-SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
-BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
-
-#---------------------------------------------------------------------------------
-# use CXX for linking C++ projects, CC for standard C
-#---------------------------------------------------------------------------------
-ifeq ($(strip $(CPPFILES)),)
-#---------------------------------------------------------------------------------
-	export LD	:=	$(CC)
-#---------------------------------------------------------------------------------
-else
-#---------------------------------------------------------------------------------
-	export LD	:=	$(CXX)
-#---------------------------------------------------------------------------------
-endif
-#---------------------------------------------------------------------------------
-
-export OFILES_BIN	:=	$(addsuffix .o,$(BINFILES))
-export OFILES_SRC	:=	$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
-export OFILES 	:=	$(OFILES_BIN) $(OFILES_SRC)
-export HFILES_BIN	:=	$(addsuffix .h,$(subst .,_,$(BINFILES)))
-
-export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
-			$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
-			-I$(CURDIR)/$(BUILD)
-
-export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
-
-ifeq ($(strip $(CONFIG_JSON)),)
-	jsons := $(wildcard *.json)
-	ifneq (,$(findstring $(TARGET).json,$(jsons)))
-		export APP_JSON := $(TOPDIR)/$(TARGET).json
-	else
-		ifneq (,$(findstring config.json,$(jsons)))
-			export APP_JSON := $(TOPDIR)/config.json
-		endif
-	endif
-else
-	export APP_JSON := $(TOPDIR)/$(CONFIG_JSON)
+ifeq ($(strip $(APP_TITLE)),)
+    APP_TITLE     =    $(TARGET)
 endif
 
-ifeq ($(strip $(ICON)),)
-	icons := $(wildcard *.jpg)
-	ifneq (,$(findstring $(TARGET).jpg,$(icons)))
-		export APP_ICON := $(TOPDIR)/$(TARGET).jpg
-	else
-		ifneq (,$(findstring icon.jpg,$(icons)))
-			export APP_ICON := $(TOPDIR)/icon.jpg
-		endif
-	endif
-else
-	export APP_ICON := $(TOPDIR)/$(ICON)
+ifeq ($(strip $(APP_AUTHOR)),)
+    APP_AUTHOR    =    Unspecified
 endif
 
-ifeq ($(strip $(NO_ICON)),)
-	export NROFLAGS += --icon=$(APP_ICON)
-endif
-
-ifeq ($(strip $(NO_NACP)),)
-	export NROFLAGS += --nacp=$(CURDIR)/$(TARGET).nacp
+ifeq ($(strip $(APP_VERSION)),)
+    APP_VERSION   =    Unspecified
 endif
 
 ifneq ($(APP_TITLEID),)
-	export NACPFLAGS += --titleid=$(APP_TITLEID)
+    NACPFLAGS    +=    --titleid=$(strip $(APP_TITLEID))
 endif
+
+ifeq ($(strip $(APP_ICON)),)
+    APP_ICON      =    $(LIBNX)/default_icon.jpg
+endif
+
+NROFLAGS          =    --icon=$(strip $(APP_ICON)) --nacp=$(strip $(NACP_TARGET))
 
 ifneq ($(ROMFS),)
-	export NROFLAGS += --romfsdir=$(CURDIR)/$(ROMFS)
+    NROFLAGS     +=    --romfsdir=$(strip $(ROMFS))
+    ROMFS_TARGET +=    $(shell find $(ROMFS) -type 'f')
 endif
 
-.PHONY: $(BUILD) clean all
+# -----------------------------------------------
 
-#---------------------------------------------------------------------------------
-all: $(BUILD)
+.SUFFIXES:
 
+.PHONY: all libs clean mrproper $(CUSTOM_LIBS)
 
-$(BUILD):
-	@[ -d $@ ] || mkdir -p $@
-	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
+all: $(NX_TARGET)
 
-#---------------------------------------------------------------------------------
+libs: $(CUSTOM_LIBS)
+
+$(CUSTOM_LIBS):
+	@$(MAKE) -s --no-print-directory -C $@
+
+$(NX_TARGET): $(ROMFS_TARGET) $(APP_ICON) $(NACP_TARGET) $(ELF_TARGET)
+	@echo " OVL " $@
+	@mkdir -p $(dir $@)
+	@elf2nro $(ELF_TARGET) $@ $(NROFLAGS) > /dev/null
+	@echo "Built" $(notdir $@)
+
+$(ELF_TARGET): $(OFILES) $(LIBS_TARGET) | libs
+	@echo " LD  " $@
+	@mkdir -p $(dir $@)
+	@$(LD) $(ARCH) $(LDFLAGS) -Wl,-Map,$(BUILD)/$(TARGET).map $(LIB_FLAGS) $(OFILES) $(LINKS) -o $@
+	@$(NM) -CSn $@ > $(BUILD)/$(TARGET).lst
+
+$(BUILD)/%.c.o: %.c
+	@echo " CC  " $@
+	@mkdir -p $(dir $@)
+	@$(CC) -MMD -MP $(ARCH) $(FLAGS) $(CFLAGS) $(DEFINE_FLAGS) $(INCLUDE_FLAGS) -c $(CURDIR)/$< -o $@
+
+$(BUILD)/%.cpp.o: %.cpp
+	@echo " CXX " $@
+	@mkdir -p $(dir $@)
+	@$(CXX) -MMD -MP $(ARCH) $(FLAGS) $(CXXFLAGS) $(DEFINE_FLAGS) $(INCLUDE_FLAGS) -c $(CURDIR)/$< -o $@
+
+$(BUILD)/%.s.o: %.s %.S
+	@echo " AS  " $@
+	@mkdir -p $(dir $@)
+	@$(AS) -MMD -MP -x assembler-with-cpp $(ARCH) $(FLAGS) $(ASFLAGS) $(INCLUDE_FLAGS) -c $(CURDIR)/$< -o $@
+
+%.nacp:
+	@echo " NACP" $@
+	@mkdir -p $(dir $@)
+	@nacptool --create "$(APP_TITLE)" "$(APP_AUTHOR)" "$(APP_VERSION)" $@ $(NACPFLAGS)
+
 clean:
-	@rm -fr $(BUILD) $(TARGET).ovl $(TARGET).nro $(TARGET).nacp $(TARGET).elf
+	@echo Cleaning...
+	@rm -rf $(BUILD) $(OUT)
 
+mrproper: clean
+	@for dir in $(CUSTOM_LIBS); do $(MAKE) --no-print-directory -C $$dir clean; done
 
-#---------------------------------------------------------------------------------
-else
-.PHONY:	all
-
-DEPENDS	:=	$(OFILES:.o=.d)
-
-#---------------------------------------------------------------------------------
-# main targets
-#---------------------------------------------------------------------------------
-all	:	 $(OUTPUT).ovl
-
-$(OUTPUT).ovl		:	$(OUTPUT).elf $(OUTPUT).nacp 
-	@elf2nro $< $@ $(NROFLAGS)
-	@echo "built ... $(notdir $(OUTPUT).ovl)"
-
-$(OUTPUT).elf	:	$(OFILES)
-
-$(OFILES_SRC)	: $(HFILES_BIN)
-
-#---------------------------------------------------------------------------------
-# you need a rule like this for each extension you use as binary data
-#---------------------------------------------------------------------------------
-%.bin.o	%_bin.h :	%.bin
-#---------------------------------------------------------------------------------
-	@echo $(notdir $<)
-	@$(bin2o)
-
--include $(DEPENDS)
-
-#---------------------------------------------------------------------------------------
-endif
-#---------------------------------------------------------------------------------------
+-include $(DFILES)
