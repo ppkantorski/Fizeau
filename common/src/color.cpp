@@ -25,14 +25,14 @@
 
 namespace fz {
 
-ColorMatrix filter_matrix(ColorFilter filter) {
+ColorMatrix filter_matrix(Component filter) {
     ColorMatrix arr = {};
 
     static constexpr std::array luma_components = {
         0.2126f, 0.7152f, 0.0722f,
     };
 
-    if (filter == ColorFilter_None) {
+    if (filter == Component_None) {
         arr[0] = arr[4] = arr[8] = 1.0f;
         return arr;
     }
@@ -40,9 +40,9 @@ ColorMatrix filter_matrix(ColorFilter filter) {
     std::size_t offset = 0;
     switch (filter) {
         default:
-        case ColorFilter_Red:   offset = 0; break;
-        case ColorFilter_Green: offset = 3; break;
-        case ColorFilter_Blue:  offset = 6; break;
+        case Component_Red:   offset = 0; break;
+        case Component_Green: offset = 3; break;
+        case Component_Blue:  offset = 6; break;
     }
 
     for (std::size_t i = 0; i < 3; ++i)
@@ -120,31 +120,31 @@ float regamma(float x, Gamma gamma) {
 
 }
 
-void gamma_ramp(float (*func)(float, Gamma), std::uint16_t *array, std::size_t size, Gamma gamma, std::size_t nb_bits, float lo, float hi) {
+void gamma_ramp(float (*func)(float, Gamma), std::uint16_t *array, std::size_t size, Gamma gamma, std::size_t nb_bits, float lo, float hi, float off) {
     float step = (hi - lo) / (size - 1), cur = lo;
     std::uint16_t shift = (1 << nb_bits) - 1, mask = (1 << (nb_bits + 1)) - 1;
 
     for (std::size_t i = 0; i < size; ++i, cur += step)
-        array[i] = static_cast<std::uint16_t>(std::round(func(cur, gamma) * shift)) & mask;
+        array[i] = static_cast<std::uint16_t>(std::round(func(std::clamp(cur + off, 0.0f, 1.0f), gamma) * shift)) & mask;
 }
 
-void apply_luma(std::uint16_t *array, std::size_t size, Luminance luma) {
+void apply_luma(std::uint16_t *array, std::size_t size, std::size_t nb_bits, Luminance luma) {
     luma = std::clamp(luma, MIN_LUMA, MAX_LUMA) + MAX_LUMA;
     if (luma == 1.0f)
         return; // No effect, fast path
 
-    auto max = array[size - 1];
+    auto max = (1 << nb_bits) - 1;
     for (std::size_t i = 0; i < size; ++i)
         array[i] = std::clamp(static_cast<std::uint16_t>(std::round(array[i] * luma)),
             static_cast<std::uint16_t>(0), static_cast<std::uint16_t>(max));
 }
 
-void apply_range(std::uint16_t *array, std::size_t size, float lo, float hi) {
+void apply_range(std::uint16_t *array, std::size_t size, std::size_t nb_bits, float lo, float hi) {
     lo = std::clamp(lo, 0.0f, hi), hi = std::clamp(hi, lo, 1.0f);
     if ((lo == 0.0f) && (hi == 1.0f))
         return; // No effect, fast path
 
-    auto max = array[size - 1];
+    auto max = std::min<std::size_t>(array[size - 1], (1 << nb_bits) - 1);
     for (std::size_t i = 0; i < size; ++i)
         array[i] = static_cast<std::uint16_t>(std::round(array[i] * (hi - lo) + lo * max));
 }
