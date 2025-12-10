@@ -58,7 +58,8 @@ class FizeauOverlayGui: public tsl::Gui {
 
         tsl::elm::CustomDrawer      *info_header;
         tsl::elm::ListItem          *active_button;
-        tsl::elm::ListItem          *apply_button;
+        //tsl::elm::ListItem          *apply_button;
+        tsl::elm::ListItem          *reset_button;
         tsl::elm::TrackBar          *temp_slider;
         tsl::elm::TrackBar          *sat_slider;
         tsl::elm::TrackBar          *hue_slider;
