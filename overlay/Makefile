@@ -6,31 +6,41 @@ TOPDIR           ?=    $(CURDIR)
 
 # -----------------------------------------------
 
-APP_TITLE         :=    Fizeau
-APP_AUTHOR        :=    averne
-APP_ICON          :=
-APP_VERSION       :=    2.8.1+
-APP_TITLEID       :=
+APP_TITLE         =    Fizeau
+APP_AUTHOR        =    averne
+APP_ICON          =
+APP_VERSION       =    2.8.2+
+APP_TITLEID       =
 
-TARGET            :=    Fizeau
-EXTENSION         :=    ovl
-OUT               :=    out
-BUILD             :=    build
-SOURCES           :=    lib/libultrahand/libultra/source src
-INCLUDES          :=    lib/libultrahand/libultra/include lib/libultrahand/libtesla/include include
-CUSTOM_LIBS       :=    ../common ../lib/inih
-ROMFS             :=
+TARGET            =    Fizeau
+EXTENSION         =    ovl
+OUT               =    out
+BUILD             =    build
+SOURCES           =    src
+INCLUDES          =    include
+CUSTOM_LIBS       =    ../common ../lib/inih
+ROMFS             =
 
-DEFINES           :=    __SWITCH__ VERSION=\"$(APP_VERSION)\" COMMIT=\"$(FZ_COMMIT)\"
-ARCH              :=    -march=armv8-a+crc+crypto+simd -mtune=cortex-a57 -mtp=soft -fpie
-FLAGS             :=    -Wall -pipe -g -O2 -ffunction-sections -fdata-sections
-CFLAGS            :=    -std=gnu11
-CXXFLAGS          :=    -std=gnu++20 -fno-exceptions
+include lib/libultrahand/ultrahand.mk
+
+DEFINES           =    __SWITCH__ VERSION=\"$(APP_VERSION)\" COMMIT=\"$(FZ_COMMIT)\"
+ARCH              =    -march=armv8-a+crc+crypto+simd -mtune=cortex-a57 -mtp=soft -fpie
+FLAGS             =    -g -Wall -O3 -ffunction-sections -fdata-sections -flto \
+                       -fuse-linker-plugin -fomit-frame-pointer -finline-small-functions \
+                       -fno-strict-aliasing -frename-registers -falign-functions=16
+CFLAGS            =    -std=gnu11
+CXXFLAGS          =    -std=c++26 -fno-exceptions
+
 
 # Enable appearance overriding
 UI_OVERRIDE_PATH := /config/Fizeau/
 CFLAGS += -DUI_OVERRIDE_PATH="\"$(UI_OVERRIDE_PATH)\""
 CXXFLAGS += -DUI_OVERRIDE_PATH="\"$(UI_OVERRIDE_PATH)\""
+
+# Enable Widget
+USING_WIDGET_DIRECTIVE := 1  # or true
+CFLAGS += -DUSING_WIDGET_DIRECTIVE=$(USING_WIDGET_DIRECTIVE)
+CXXFLAGS += -DUSING_WIDGET_DIRECTIVE=$(USING_WIDGET_DIRECTIVE)
 
 # For theme / wallpaper loading conducted in GUI class method (add to project if theme does not appear)
 INITIALIZE_IN_GUI_DIRECTIVE := 1
@@ -38,41 +48,42 @@ CFLAGS += -DINITIALIZE_IN_GUI_DIRECTIVE=$(INITIALIZE_IN_GUI_DIRECTIVE)
 CXXFLAGS += -DINITIALIZE_IN_GUI_DIRECTIVE=$(INITIALIZE_IN_GUI_DIRECTIVE)
 
 
-ASFLAGS           :=
-LDFLAGS           :=    -Wl,-pie -specs=$(DEVKITPRO)/libnx/switch.specs -g
-LINKS             :=    -lcommon -linih -lcurl -lz -lzzip -lmbedtls -lmbedx509 -lmbedcrypto -ljansson -lnx 
+ASFLAGS           =
+LDFLAGS           =    -Wl,-pie -specs=$(DEVKITPRO)/libnx/switch.specs -g
+LINKS             =    -lcommon -linih -lcurl -lz -lminizip -lmbedtls -lmbedx509 -lmbedcrypto -lnx
 
-PREFIX            :=    aarch64-none-elf-
-CC                :=    $(PREFIX)gcc
-CXX               :=    $(PREFIX)g++
-AS                :=    $(PREFIX)as
-LD                :=    $(PREFIX)g++
-NM                :=    $(PREFIX)gcc-nm
+PREFIX            =    aarch64-none-elf-
+CC                =    $(PREFIX)gcc
+CXX               =    $(PREFIX)g++
+AS                =    $(PREFIX)as
+LD                =    $(PREFIX)g++
+NM                =    $(PREFIX)gcc-nm
 
 # -----------------------------------------------
 
 export PATH      :=    $(DEVKITPRO)/tools/bin:$(DEVKITPRO)/devkitA64/bin:$(PORTLIBS)/bin:$(PATH)
 
-PORTLIBS          :=    $(DEVKITPRO)/portlibs/switch
-LIBNX             :=    $(DEVKITPRO)/libnx
-LIBS              :=    $(CUSTOM_LIBS) $(LIBNX) $(PORTLIBS)
+PORTLIBS          =    $(DEVKITPRO)/portlibs/switch
+LIBNX             =    $(DEVKITPRO)/libnx
+LIBS              =    $(CUSTOM_LIBS) $(LIBNX) $(PORTLIBS)
+
 # -----------------------------------------------
 
-CFILES            :=    $(shell find $(SOURCES) -name *.c)
-CPPFILES          :=    $(shell find $(SOURCES) -name *.cpp)
-SFILES            :=    $(shell find $(SOURCES) -name *.s -or -name *.S)
-OFILES            :=    $(CFILES:%=$(BUILD)/%.o) $(CPPFILES:%=$(BUILD)/%.o) $(SFILES:%=$(BUILD)/%.o)
-DFILES            :=    $(OFILES:.o=.d)
+CFILES            =    $(shell find $(SOURCES) -name *.c)
+CPPFILES          =    $(shell find $(SOURCES) -name *.cpp)
+SFILES            =    $(shell find $(SOURCES) -name *.s -or -name *.S)
+OFILES            =    $(CFILES:%=$(BUILD)/%.o) $(CPPFILES:%=$(BUILD)/%.o) $(SFILES:%=$(BUILD)/%.o)
+DFILES            =    $(OFILES:.o=.d)
 
-LIBS_TARGET       :=    $(shell find $(addsuffix /lib,$(CUSTOM_LIBS)) -name "*.a" 2>/dev/null)
-NX_TARGET         :=    $(if $(OUT:=), $(OUT)/$(TARGET).$(EXTENSION), .$(OUT)/$(TARGET).$(EXTENSION))
-ELF_TARGET        :=    $(if $(OUT:=), $(OUT)/$(TARGET).elf, .$(OUT)/$(TARGET).elf)
-NACP_TARGET       :=    $(if $(OUT:=), $(OUT)/$(TARGET).nacp, .$(OUT)/$(TARGET).nacp)
+LIBS_TARGET       =    $(shell find $(addsuffix /lib,$(CUSTOM_LIBS)) -name "*.a" 2>/dev/null)
+NX_TARGET         =    $(if $(OUT:=), $(OUT)/$(TARGET).$(EXTENSION), .$(OUT)/$(TARGET).$(EXTENSION))
+ELF_TARGET        =    $(if $(OUT:=), $(OUT)/$(TARGET).elf, .$(OUT)/$(TARGET).elf)
+NACP_TARGET       =    $(if $(OUT:=), $(OUT)/$(TARGET).nacp, .$(OUT)/$(TARGET).nacp)
 
-DEFINE_FLAGS      :=    $(addprefix -D,$(DEFINES))
-INCLUDE_FLAGS     :=    $(addprefix -I$(CURDIR)/,$(INCLUDES)) $(foreach dir,$(CUSTOM_LIBS),-I$(CURDIR)/$(dir)/include) \
+DEFINE_FLAGS      =    $(addprefix -D,$(DEFINES))
+INCLUDE_FLAGS     =    $(addprefix -I$(CURDIR)/,$(INCLUDES)) $(foreach dir,$(CUSTOM_LIBS),-I$(CURDIR)/$(dir)/include) \
                        $(foreach dir,$(filter-out $(CUSTOM_LIBS),$(LIBS)),-I$(dir)/include)
-LIB_FLAGS         :=    $(foreach dir,$(LIBS),-L$(dir)/lib)
+LIB_FLAGS         =    $(foreach dir,$(LIBS),-L$(dir)/lib)
 
 # -----------------------------------------------
 
@@ -120,6 +131,8 @@ $(NX_TARGET): $(ROMFS_TARGET) $(APP_ICON) $(NACP_TARGET) $(ELF_TARGET)
 	@echo " OVL " $@
 	@mkdir -p $(dir $@)
 	@elf2nro $(ELF_TARGET) $@ $(NROFLAGS) > /dev/null
+	@printf 'ULTR' >> $@
+	@printf "Ultrahand signature has been added.\n"
 	@echo "Built" $(notdir $@)
 
 $(ELF_TARGET): $(OFILES) $(LIBS_TARGET) | libs
