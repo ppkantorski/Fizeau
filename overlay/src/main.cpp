@@ -43,6 +43,38 @@ bool is_full(const ColorRange &range) {
 
 } // namespace
 
+
+// ========================================
+// ServiceInactiveGui Class
+// ========================================
+class ServiceInactiveGui: public tsl::Gui {
+public:
+    ServiceInactiveGui() { }
+    
+    virtual ~ServiceInactiveGui() {
+        tsl::Overlay::get()->close();
+    }
+    
+    virtual tsl::elm::Element *createUI() override {
+        auto* frame = new tsl::elm::OverlayFrame("Fizeau", VERSION, false);
+        
+        auto* drawer = new tsl::elm::CustomDrawer([](tsl::gfx::Renderer *renderer, s32 x, s32 y, s32 w, s32 h) {
+            renderer->drawString("Fizeau system module is not active.", false, x + 16, y +  80, 20, (0xffff));
+            renderer->drawString("Enable the system module and",        false, x + 16, y + 110, 20, (0xffff));
+            renderer->drawString("reboot your device.",                 false, x + 16, y + 130, 20, (0xffff));
+        });
+
+        frame->setContent(drawer);
+        
+        #if USING_WIDGET_DIRECTIVE
+        frame->m_showWidget = true;
+        #endif
+        
+        return frame;
+    }
+};
+
+
 // ========================================
 // ErrorGui Class
 // ========================================
@@ -55,9 +87,9 @@ public:
     }
     
     virtual tsl::elm::Element *createUI() override {
-        auto *frame = new tsl::elm::OverlayFrame("Fizeau", VERSION, false);
+        auto* frame = new tsl::elm::OverlayFrame("Fizeau", VERSION, false);
         
-        auto *drawer = new tsl::elm::CustomDrawer([this](tsl::gfx::Renderer *renderer, s32 x, s32 y, s32 w, s32 h) {
+        auto* drawer = new tsl::elm::CustomDrawer([this](tsl::gfx::Renderer *renderer, s32 x, s32 y, s32 w, s32 h) {
             renderer->drawString(format("%#x (%04d-%04d)", this->rc, R_MODULE(this->rc) + 2000, R_DESCRIPTION(this->rc)).c_str(),
                                                                          false, x, y +  50, 20, (0xffff));
             renderer->drawString("An error occurred",                    false, x, y +  80, 20, (0xffff));
@@ -369,8 +401,8 @@ public:
         this->gamma_header      = new tsl::elm::CategoryHeader("");
         this->luma_header       = new tsl::elm::CategoryHeader("");
 
-        auto *frame = new tsl::elm::OverlayFrame("Fizeau", VERSION);
-        auto *list = new tsl::elm::List();
+        auto* frame = new tsl::elm::OverlayFrame("Fizeau", VERSION);
+        auto* list = new tsl::elm::List();
 
         list->addItem(this->info_header, 60);
         list->addItem(this->active_button);
@@ -504,8 +536,8 @@ public:
     
     virtual std::unique_ptr<tsl::Gui> loadInitialGui() override {
         if (!serviceActive) {
-            tsl::Overlay::get()->close();
-            return nullptr;
+            // Return a specific GUI for inactive service
+            return initially<fz::ServiceInactiveGui>();
         }
         
         return initially<fz::FizeauOverlayGui>();
