@@ -124,6 +124,10 @@ public:
 
         this->config.read();
 
+        // Read the actual active state from the system
+        if (this->rc = fizeauGetIsActive(&this->config.active); R_FAILED(this->rc))
+            return;
+
         ApmPerformanceMode perf_mode;
         if (this->rc = apmGetPerformanceMode(&perf_mode); R_FAILED(this->rc))
             return;
@@ -152,7 +156,7 @@ public:
                 false, x, y + 45, 20, (0xffff));
         });
 
-        static bool enable_extra_hot_temps = false;
+        bool enable_extra_hot_temps = false;
         if ((this->is_day ? this->config.profile.day_settings.temperature : this->config.profile.night_settings.temperature) > D65_TEMP)
             enable_extra_hot_temps = true;
 
@@ -232,7 +236,7 @@ public:
             }
             return false;
         });
-        this->temp_slider->setValueChangedListener([this](std::uint8_t val) {
+        this->temp_slider->setValueChangedListener([this, enable_extra_hot_temps](std::uint8_t val) {
             (this->is_day ? this->config.profile.day_settings.temperature : this->config.profile.night_settings.temperature) =
                 val * ((enable_extra_hot_temps ? MAX_TEMP : D65_TEMP) - MIN_TEMP) / 100 + MIN_TEMP;
             this->pending_apply = true;
