@@ -1,4 +1,4 @@
-# <img src="https://github.com/user-attachments/assets/da73e423-2941-4869-a28b-dbf5a4d2db03" width=48> Fizeau
+# <img src="https://github.com/user-attachments/assets/da73e423-2941-4869-a28b-dbf5a4d2db03" width=48> Fizeau (libultrahand build)
 
 Adjust the color of the screen of your Nintendo Switch.
 
