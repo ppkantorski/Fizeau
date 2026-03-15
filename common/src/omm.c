@@ -39,7 +39,7 @@ Service* ommGetServiceSession(void) {
     return &g_ommSrv;
 }
 
-Result ommGetOperationMode(AppletOperationMode *mode) {
+Result ommGetOperationMode(OmmOperationMode *mode) {
     u8 tmp;
 
     Result rc = serviceDispatchOut(&g_ommSrv, 0, tmp);
