@@ -32,7 +32,7 @@ extern "C" {
 Result ommInitialize(void);
 void ommExit();
 
-Result ommGetOperationMode(AppletOperationMode *mode);
+Result ommGetOperationMode(OmmOperationMode *mode);
 Result ommGetOperationModeChangeEvent(Event *out, bool autoclear);
 
 #ifdef __cplusplus
