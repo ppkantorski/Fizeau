@@ -19,6 +19,7 @@
 #define STBTT_STATIC
 #define TESLA_INIT_IMPL
 
+#include <exception_wrap.hpp>
 #include <tesla.hpp>
 #include <common.hpp>
 
@@ -232,6 +233,7 @@ public:
                 this->rc = this->config.apply();
                 this->pending_apply = false;
                 this->apply_counter = 0;
+                triggerSettingsFeedback();
                 return true;
             }
             return false;
@@ -252,6 +254,7 @@ public:
                 this->rc = this->config.apply();
                 this->pending_apply = false;
                 this->apply_counter = 0;
+                triggerSettingsFeedback();
                 return true;
             }
             return false;
@@ -272,6 +275,7 @@ public:
                 this->rc = this->config.apply();
                 this->pending_apply = false;
                 this->apply_counter = 0;
+                triggerSettingsFeedback();
                 return true;
             }
             return false;
@@ -291,6 +295,7 @@ public:
                 this->rc = this->config.apply();
                 this->pending_apply = false;
                 this->apply_counter = 0;
+                triggerSettingsFeedback();
                 return true;
             }
             return false;
@@ -309,6 +314,7 @@ public:
                 this->rc = this->config.apply();
                 this->pending_apply = false;
                 this->apply_counter = 0;
+                triggerSettingsFeedback();
                 return true;
             }
             return false;
@@ -328,6 +334,7 @@ public:
                 this->rc = this->config.apply();
                 this->pending_apply = false;
                 this->apply_counter = 0;
+                triggerSettingsFeedback();
                 return true;
             }
             return false;
@@ -348,6 +355,7 @@ public:
                 this->rc = this->config.apply();
                 this->pending_apply = false;
                 this->apply_counter = 0;
+                triggerSettingsFeedback();
                 return true;
             }
             return false;
@@ -368,6 +376,7 @@ public:
                 this->rc = this->config.apply();
                 this->pending_apply = false;
                 this->apply_counter = 0;
+                triggerSettingsFeedback();
                 return true;
             }
             return false;

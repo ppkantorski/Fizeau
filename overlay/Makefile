@@ -38,7 +38,7 @@ include $(DEVKITPRO)/libnx/switch_rules
 #---------------------------------------------------------------------------------
 APP_TITLE	:= Fizeau
 APP_AUTHOR	:= averne
-APP_VERSION	:= 2.8.2+r3
+APP_VERSION	:= 2.8.2+r4
 TARGET	    := Fizeau
 BUILD	    := build
 SOURCES	    := src ../common/src ../lib/inih/inih
@@ -65,8 +65,15 @@ UI_OVERRIDE_PATH := /config/Fizeau/
 CFLAGS += -DUI_OVERRIDE_PATH="\"$(UI_OVERRIDE_PATH)\""
 
 # Enable Widget
-USING_WIDGET_DIRECTIVE := 1
-CFLAGS += -DUSING_WIDGET_DIRECTIVE=$(USING_WIDGET_DIRECTIVE)
+CFLAGS += -DUSING_WIDGET_DIRECTIVE=1
+
+# Exception wrap utilization (for smaller compilation size)
+CFLAGS += -DUSE_EXCEPTION_WRAP=1
+
+# Requires USE_EXCEPTION_WRAP and inclusion of exception_wrap.hpp in main
+LDFLAGS += -Wl,-wrap,__cxa_throw \
+           -Wl,-wrap,_Unwind_Resume \
+           -Wl,-wrap,__gxx_personality_v0
 
 # For theme / wallpaper loading conducted in GUI class method (add to project if theme does not appear)
 #INITIALIZE_IN_GUI_DIRECTIVE := 1
