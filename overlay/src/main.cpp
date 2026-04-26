@@ -414,7 +414,6 @@ public:
         this->gamma_header      = new tsl::elm::CategoryHeader("Gamma");
         this->luma_header       = new tsl::elm::CategoryHeader("Luminance");
 
-        auto* frame = new tsl::elm::OverlayFrame("Fizeau", VERSION);
         auto* list = new tsl::elm::List();
 
         list->addItem(this->info_header, 60);
@@ -438,6 +437,7 @@ public:
         list->addItem(this->luma_slider);
         list->addItem(this->range_button);
         
+        auto* frame = new tsl::elm::OverlayFrame("Fizeau", VERSION);
         frame->setContent(list);
         
         #if USING_WIDGET_DIRECTIVE
