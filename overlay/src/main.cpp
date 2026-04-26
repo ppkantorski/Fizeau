@@ -161,7 +161,7 @@ public:
         if ((this->is_day ? this->config.profile.day_settings.temperature : this->config.profile.night_settings.temperature) > D65_TEMP)
             enable_extra_hot_temps = true;
 
-        this->active_button = new tsl::elm::ListItem("Correction active");
+        this->active_button = new tsl::elm::ListItem("Correction State");
         this->active_button->setClickListener([this](std::uint64_t keys) {
             if (keys & HidNpadButton_A) {
                 this->config.active ^= 1;
@@ -173,7 +173,7 @@ public:
         });
         this->active_button->setValue(this->config.active ? "Active": "Inactive");
 
-        this->reset_button = new tsl::elm::ListItem("Reset settings");
+        this->reset_button = new tsl::elm::ListItem("Reset Settings");
         this->reset_button->setClickListener([this, enable_extra_hot_temps](std::uint64_t keys) mutable {
             if (keys & HidNpadButton_A) {
                 // Reset temperature
@@ -387,7 +387,7 @@ public:
             this->pending_apply = true;
         });
 
-        this->range_button = new tsl::elm::ListItem("Color range");
+        this->range_button = new tsl::elm::ListItem("Color Range");
         this->range_button->setClickListener([this](std::uint64_t keys) {
             if (keys & HidNpadButton_A) {
                 auto &range = (this->is_day ? this->config.profile.day_settings.range : this->config.profile.night_settings.range);
