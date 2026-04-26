@@ -17,34 +17,36 @@ EXTENSION         =    nro
 OUT               =    out
 BUILD             =    build
 SOURCES           =    src
-INCLUDES          =    include ../lib/libstratosphere/libstratosphere/include ../lib/nvjpg/oss-nvjpg/include
+INCLUDES          =    include ../lib/libstratosphere/libstratosphere/include ../lib/nvjpg/oss-nvjpg/include \
+                       $(DEVKITPRO)/portlibs/switch/include
 CUSTOM_LIBS       =    ../common ../lib/imgui-nx ../lib/imgui ../lib/inih ../lib/nvjpg
 ROMFS             =    res
 
 DEFINES           =    __SWITCH__ VERSION=\"$(FZ_VERSION)\" COMMIT=\"$(FZ_COMMIT)\" \
-                       APPLICATION NXLINK
+                       APPLICATION NXLINK _GNU_SOURCE
 ARCH              =    -march=armv8-a+crc+crypto+simd -mtune=cortex-a57 -mtp=soft -fpie
 FLAGS             =    -Wall -pipe -g -O2 -ffunction-sections -fdata-sections
 CFLAGS            =    -std=gnu11
-CXXFLAGS          =    -std=gnu++20 -fno-rtti -fno-exceptions
+CXXFLAGS          =    -std=c++26 -fno-rtti -fno-exceptions
 ASFLAGS           =
 LDFLAGS           =    -Wl,-pie -specs=$(DEVKITPRO)/libnx/switch.specs -g
 LINKS             =    -lcommon -limgui-nx -limgui -lnvjpg -linih -ldeko3d -lnx
 
 PREFIX            =    aarch64-none-elf-
-CC                =    $(PREFIX)gcc
-CXX               =    $(PREFIX)g++
-AS                =    $(PREFIX)as
-LD                =    $(PREFIX)g++
-NM                =    $(PREFIX)gcc-nm
+DEVKITA64         =    $(DEVKITPRO)/devkitA64/bin
+CC                =    $(DEVKITA64)/$(PREFIX)gcc
+CXX               =    $(DEVKITA64)/$(PREFIX)g++
+AS                =    $(DEVKITA64)/$(PREFIX)as
+LD                =    $(DEVKITA64)/$(PREFIX)g++
+NM                =    $(DEVKITA64)/$(PREFIX)gcc-nm
 
 # -----------------------------------------------
-
-export PATH      :=    $(DEVKITPRO)/tools/bin:$(DEVKITPRO)/devkitA64/bin:$(PORTLIBS)/bin:$(PATH)
 
 PORTLIBS          =    $(DEVKITPRO)/portlibs/switch
 LIBNX             =    $(DEVKITPRO)/libnx
 LIBS              =    $(CUSTOM_LIBS) $(LIBNX) $(PORTLIBS)
+
+export PATH      :=    $(DEVKITPRO)/tools/bin:$(DEVKITA64):$(PORTLIBS)/bin:$(PATH)
 
 # -----------------------------------------------
 
