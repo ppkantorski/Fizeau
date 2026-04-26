@@ -405,14 +405,14 @@ public:
         });
         this->range_button->setValue(is_full(this->is_day ? this->config.profile.day_settings.range : this->config.profile.night_settings.range) ? "Full" : "Limited");
 
-        this->temp_header       = new tsl::elm::CategoryHeader("");
-        this->sat_header        = new tsl::elm::CategoryHeader("");
-        this->hue_header        = new tsl::elm::CategoryHeader("");
+        this->temp_header       = new tsl::elm::CategoryHeader("Temperature");
+        this->sat_header        = new tsl::elm::CategoryHeader("Saturation");
+        this->hue_header        = new tsl::elm::CategoryHeader("Hue");
         this->components_header = new tsl::elm::CategoryHeader("Components");
         this->filter_header     = new tsl::elm::CategoryHeader("Filter");
-        this->contrast_header   = new tsl::elm::CategoryHeader("");
-        this->gamma_header      = new tsl::elm::CategoryHeader("");
-        this->luma_header       = new tsl::elm::CategoryHeader("");
+        this->contrast_header   = new tsl::elm::CategoryHeader("Contrast");
+        this->gamma_header      = new tsl::elm::CategoryHeader("Gamma");
+        this->luma_header       = new tsl::elm::CategoryHeader("Luminance");
 
         auto* frame = new tsl::elm::OverlayFrame("Fizeau", VERSION);
         auto* list = new tsl::elm::List();
@@ -469,18 +469,18 @@ public:
             }
         }
 
-        this->temp_header->setText(format("Temperature: %u°K",
-            this->is_day ? this->config.profile.day_settings.temperature : this->config.profile.night_settings.temperature));
-        this->sat_header->setText(format("Saturation: %.2f",
-            this->is_day ? this->config.profile.day_settings.saturation  : this->config.profile.night_settings.saturation));
-        this->hue_header->setText(format("Hue: %.2f",
-            this->is_day ? this->config.profile.day_settings.hue         : this->config.profile.night_settings.hue));
-        this->contrast_header->setText(format("Contrast: %.2f",
-            this->is_day ? this->config.profile.day_settings.contrast    : this->config.profile.night_settings.contrast));
-        this->gamma_header->setText(format("Gamma: %.2f",
-            this->is_day ? this->config.profile.day_settings.gamma       : this->config.profile.night_settings.gamma));
-        this->luma_header->setText(format("Luminance: %.2f",
-            this->is_day ? this->config.profile.day_settings.luminance   : this->config.profile.night_settings.luminance));
+        this->temp_header->setValue(format("%u°K",
+            this->is_day ? this->config.profile.day_settings.temperature : this->config.profile.night_settings.temperature), tsl::onTextColor);
+        this->sat_header->setValue(format("%.2f",
+            this->is_day ? this->config.profile.day_settings.saturation  : this->config.profile.night_settings.saturation), tsl::onTextColor);
+        this->hue_header->setValue(format("%.2f",
+            this->is_day ? this->config.profile.day_settings.hue         : this->config.profile.night_settings.hue), tsl::onTextColor);
+        this->contrast_header->setValue(format("%.2f",
+            this->is_day ? this->config.profile.day_settings.contrast    : this->config.profile.night_settings.contrast), tsl::onTextColor);
+        this->gamma_header->setValue(format("%.2f",
+            this->is_day ? this->config.profile.day_settings.gamma       : this->config.profile.night_settings.gamma), tsl::onTextColor);
+        this->luma_header->setValue(format("%.2f",
+            this->is_day ? this->config.profile.day_settings.luminance   : this->config.profile.night_settings.luminance), tsl::onTextColor);
     }
 
     Config &get_config() {
