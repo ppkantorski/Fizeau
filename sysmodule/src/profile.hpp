@@ -55,7 +55,7 @@ class ProfileManager {
             event_monitor_thread_stack[0x1000] alignas(0x1000) = {};
 
         Event operation_mode_event = {};
-        AppletOperationMode operation_mode = {};
+        OmmOperationMode operation_mode = {};
 
         Event activity_event = {};
         std::uint64_t activity_tick = {};

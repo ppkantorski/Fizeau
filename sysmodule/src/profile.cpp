@@ -84,7 +84,7 @@ void ProfileManager::transition_thread_func(void *args) {
         if (!self->context.is_active)
             continue;
 
-        bool need_apply = false, is_handheld = self->operation_mode == AppletOperationMode_Handheld;
+        bool need_apply = false, is_handheld = self->operation_mode == OmmOperationMode_Handheld;
 
         // CMU resets
         if (!need_apply) {
@@ -296,7 +296,7 @@ Result ProfileManager::apply() {
     bool should_dim_internal = should_dim(this->context.internal_profile, timeout);
     bool should_dim_external = should_dim(this->context.external_profile, timeout);
 
-    auto is_handheld = this->operation_mode == AppletOperationMode_Handheld;
+    auto is_handheld = this->operation_mode == OmmOperationMode_Handheld;
     this->is_dimming = is_handheld ? should_dim_internal : should_dim_external;
 
     mutexLock(&this->commit_mutex);

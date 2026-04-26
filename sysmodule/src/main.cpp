@@ -182,6 +182,11 @@ bool parse_config() {
     };
 
     if (auto res = ini_parse_stream(reader, &read_ctx, fz::Config::ini_handler, &config); !res) {
+        // The switch action only fires when entering a new section, so the last
+        // profile parsed never gets flushed automatically — do it here.
+        if (config.cur_profile_id != FizeauProfileId_Invalid)
+            context.profiles[config.cur_profile_id] = config.profile;
+
         context.is_active        = config.active;
         context.internal_profile = config.internal_profile;
         context.external_profile = config.external_profile;
