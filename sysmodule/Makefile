@@ -23,7 +23,7 @@ ARCH              =    -march=armv8-a+crc+crypto+simd -mtune=cortex-a57 -mtp=sof
 FLAGS             =    -Wall -pipe -g -Os -ffunction-sections -fdata-sections               		\
                        -fno-stack-protector -fno-common
 CFLAGS            =    -std=gnu11
-CXXFLAGS          =    -std=gnu++20 -fno-rtti -fno-exceptions -fno-non-call-exceptions              \
+CXXFLAGS          =    -std=c++26 -fno-rtti -fno-exceptions -fno-non-call-exceptions              \
                        -fno-threadsafe-statics -fno-use-cxa-atexit                                  \
                        -fno-asynchronous-unwind-tables -fno-unwind-tables
 ASFLAGS           =
@@ -31,19 +31,20 @@ LDFLAGS           =    -Wl,-pie -g -Os -specs=$(DEVKITPRO)/libnx/switch.specs
 LINKS             =    -lcommon -linih -lnx
 
 PREFIX            =    aarch64-none-elf-
-CC                =    $(PREFIX)gcc
-CXX               =    $(PREFIX)g++
-AS                =    $(PREFIX)as
-LD                =    $(PREFIX)g++
-NM                =    $(PREFIX)gcc-nm
+DEVKITA64         =    $(DEVKITPRO)/devkitA64/bin
+CC                =    $(DEVKITA64)/$(PREFIX)gcc
+CXX               =    $(DEVKITA64)/$(PREFIX)g++
+AS                =    $(DEVKITA64)/$(PREFIX)as
+LD                =    $(DEVKITA64)/$(PREFIX)g++
+NM                =    $(DEVKITA64)/$(PREFIX)gcc-nm
 
 # -----------------------------------------------
-
-export PATH      :=    $(DEVKITPRO)/tools/bin:$(DEVKITPRO)/devkitA64/bin:$(PORTLIBS)/bin:$(PATH)
 
 PORTLIBS          =    $(DEVKITPRO)/portlibs/switch
 LIBNX             =    $(DEVKITPRO)/libnx
 LIBS              =    $(CUSTOM_LIBS) $(LIBNX) $(PORTLIBS)
+
+export PATH      :=    $(DEVKITPRO)/tools/bin:$(DEVKITA64):$(PORTLIBS)/bin:$(PATH)
 
 # -----------------------------------------------
 
