@@ -38,7 +38,7 @@ include $(DEVKITPRO)/libnx/switch_rules
 #---------------------------------------------------------------------------------
 APP_TITLE	:= Fizeau
 APP_AUTHOR	:= averne
-APP_VERSION	:= 2.8.2+r5
+APP_VERSION	:= 2.8.2+r6
 TARGET	    := Fizeau
 BUILD	    := build
 SOURCES	    := src ../common/src ../lib/inih/inih
