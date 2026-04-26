@@ -1,4 +1,9 @@
-export FZ_VERSION =    2.8.2+r5
+ifeq ($(strip $(DEVKITPRO)),)
+$(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>/devkitpro")
+endif
+export PATH      :=    $(DEVKITPRO)/tools/bin:$(DEVKITPRO)/devkitA64/bin:$(DEVKITPRO)/portlibs/switch/bin:$(PATH)
+
+export FZ_VERSION =    2.8.2+r6
 export FZ_COMMIT  =    $(shell git rev-parse --short HEAD)
 export FZ_TID     =    0100000000000F12
 
@@ -53,18 +58,19 @@ $(DIST_TARGET): | all
 
 clean:
 	@rm -rf out
+	@for dir in $(MODULES); do $(MAKE) --no-print-directory -C $$dir clean TOPDIR=$(CURDIR)/$$dir; done
 
 mrproper: clean
-	@for dir in $(MODULES); do $(MAKE) --no-print-directory -C $$dir mrproper; done
+	@for dir in $(MODULES); do $(MAKE) --no-print-directory -C $$dir mrproper TOPDIR=$(CURDIR)/$$dir; done
 
 application:
-	@$(MAKE) -s -C $@ $(filter-out $(MODULES) dist,$(MAKECMDGOALS)) --no-print-directory
+	@$(MAKE) -s -C $@ $(filter-out $(MODULES) dist,$(MAKECMDGOALS)) --no-print-directory TOPDIR=$(CURDIR)/$@
 
 sysmodule:
-	@$(MAKE) -s -C $@ $(filter-out $(MODULES) dist,$(MAKECMDGOALS)) --no-print-directory
+	@$(MAKE) -s -C $@ $(filter-out $(MODULES) dist,$(MAKECMDGOALS)) --no-print-directory TOPDIR=$(CURDIR)/$@
 
 overlay:
-	@$(MAKE) -s -C $@ $(filter-out $(MODULES) dist,$(MAKECMDGOALS)) --no-print-directory
+	@$(MAKE) -s -C $@ $(filter-out $(MODULES) dist,$(MAKECMDGOALS)) --no-print-directory TOPDIR=$(CURDIR)/$@
 
 %:
 	@:
