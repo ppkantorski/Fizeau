@@ -3,7 +3,7 @@ $(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>/de
 endif
 export PATH      :=    $(DEVKITPRO)/tools/bin:$(DEVKITPRO)/devkitA64/bin:$(DEVKITPRO)/portlibs/switch/bin:$(PATH)
 
-export FZ_VERSION =    2.8.2+r6
+export FZ_VERSION =    2.8.2+r7
 export FZ_COMMIT  =    $(shell git rev-parse --short HEAD)
 export FZ_TID     =    0100000000000F12
 
